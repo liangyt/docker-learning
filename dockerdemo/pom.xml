@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.1.7.RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>com.java8</groupId>
+    <artifactId>dockerdemo</artifactId>
+    <version>0.0.2</version>
+    <name>dockerdemo</name>
+    <packaging>jar</packaging>
+    <description>Demo project for Spring Boot</description>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <docker.image.prefix>liangyongtong</docker.image.prefix>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <!--
+                这里有详情的介绍使用方法:
+                https://github.com/spotify/docker-maven-plugin
+                这里介绍只是通过这里的配置处理的，还有一个是通过使用 <dockerDirectory>指定 Dockerfile 路径，使用Dockerfile对应的配置处理的
+            -->
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>1.2.0</version>
+                <configuration>
+                    <imageName>${docker.image.prefix}/${project.artifactId}</imageName>
+                    <imageTags>${project.version}</imageTags>
+                    <baseImage>java:8</baseImage>
+                    <exposes>
+                        <expose>8080</expose>
+                    </exposes>
+                    <entryPoint>["java", "-jar", "/${project.build.finalName}.jar"]</entryPoint>
+                    <resources>
+                        <resource>
+                            <targetPath>/</targetPath>
+                            <directory>${project.build.directory}</directory>
+                            <include>${project.build.finalName}.jar</include>
+                        </resource>
+                    </resources>
+                    <!--
+                        这里的 serverId 需要去 maven 的setting.xml文件设置 server:
+                        如:
+                        <servers>
+                            <server>
+                              <id>docker-hub</id>
+                              <username>liangyongtong</username>
+                              <password>********</password>
+                            </server>
+                        <servers>
+                    -->
+                    <serverId>docker-hub</serverId>
+                    <registryUrl>https://cloud.docker.com/repository/docker/liangyongtong</registryUrl>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
